@@ -1,0 +1,91 @@
+---
+title: "Homework 2"
+author: "Hannah Lim"
+date: "2024-09-18"
+output:
+  html_document: default
+---
+
+``` {r}
+#Importing Leprosy Data:
+leprosy <- read.csv('Homework2_leprosy.csv')
+```
+
+
+## Question 1:
+Which country had the highest number of new leprosy cases in 2022? Why is it not a fair comparison to look at the raw number of cases when comparing prevalence of the disease across different countries?
+
+```{r}
+#Finding the what the highest number of new leprosy cases in 2022 was:
+max(leprosy$New_Cases, na.rm = TRUE)
+
+#Finding the row/country which had the highest number of new leprosy cases in 2022:
+leprosy[leprosy$New_Cases==103819, ]
+```
+India had the highest number of new leprosy cases in 2022. It is not really a fair comparison to look at the raw number of cases when comparing the prevalence of the disease across different countries because of the population sizes. Countries with a smaller population will naturally have a smaller number of new cases compared to countries with a lager population.
+
+## Question 2:
+Create a new variable in the dataset that provides the leprosy cases per 100K people in each country. Graph this new variable’s distribution and provide the relevant summary statistics inline within a short paragraph describing the distribution.
+
+``` {r}
+#Create a new variable for the data:
+leprosy$Cases_Per_100K <- ((leprosy$New_Cases/leprosy$Population)*100000)
+
+#Create a box-plot to show data:
+boxplot(leprosy$Cases_Per_100K, horizontal = TRUE, main = "Leprosy Cases per 100K People", xlab = "Number of Cases (#)", pch = 20)
+
+#Feinding relevant summary statistics:
+fivenum(leprosy$Cases_Per_100K, na.rm = TRUE)
+IQR(leprosy$Cases_Per_100K, na.rm = TRUE)
+```
+
+The median for the cases per 100K people was 0.1143411. The minimum, lower quartile, upper quartile, and maximum values were 0.0000000, 0.0000000, 1.0507863, and 29.6045152 respectively. This means that the IQR was 1.043711 where most of the number of cases per 100K people lie among the total cases of leprosy per 100K people.
+
+## Question 3:
+We want to compare cases per 100K across the different regions in this dataset.  In a single plot output, create a graph that shows the distribution of cases per 100K split by region. Output a nicely formatted table that provides the region name, number of countries in that region, and the median cases per 100K for each region.  Include a short paragraph summarizing differences in leprosy prevalence across regions.
+
+```{r}
+#Installing ggplot
+library(ggplot2)
+library(kableExtra)
+library(dplyr)
+
+#Graph:
+leprosy_ggplot<- ggplot(leprosy)
+leprosy_ggplot + geom_histogram(aes(x=Cases_Per_100K)) + facet_wrap(~Region)
+
+#Table:
+
+#Create data frame:
+median <- aggregate(Cases_Per_100K~Region, data=leprosy, FUN='median')
+number_of_countries <- leprosy %>%
+  count(Region)
+mytable <- data.frame(median$Region, median$Cases_Per_100K, number_of_countries$n)
+
+
+#Rename columns and round values:
+colnames(mytable) <- c('Region', 'Median', 'Number of Countries')
+mytable$Median <- round(mytable$Median, 3)
+mytable$'Number of Countries'  <- round(mytable$'Number of Countries', 3)
+
+#Output table:
+kable_classic(kbl(mytable,caption = "Median Cases per 100K For Each Region"),full_width = FALSE)
+```
+
+Across the regions, Africa had the highest median of 0.909 while Europe had the lowest median of 0.000. Asia/Pacific has the second highest median of 0.421 cases, then the Americas with a median of 0.212, and the Middle East had a median of 0.053. These statistics highlights the difference in medical advancements and the access to them by the greater community.
+
+## Question 4:
+Investigate the relationship between cases per 100K and one of the other variables in the dataset (other than region) by making the appropriate bivariate graph and providing the relevant summary statistic inline within a short paragraph describing the relationship.
+
+```{r}
+plot(leprosy$Land_Area, leprosy$Cases_Per_100K, main = "Leprosy Cases per 100K vs Land Area", 
+     xlab = 'Land Area', ylab = 'Cases per 100K', pch = 20)
+cor(leprosy$Land_Area,leprosy$Cases_Per_100K, use = "complete.obs")
+```
+The correlation for the relationship between the countries' land area and it's leprosy cases per 100K people was 0.1313678. This shows that there was a positive but very weak relationship between the two variables.
+
+## Question 5:
+Write a brief conclusion to your analysis summarizing what you found. Include a hyperlink to the website for the International Leprosy Association for readers wanting more information about this disease.
+
+Overall, the new cases of leprosy in 2022 are very minimal. The median for new cases per 100K people around the world was 0.1143411, meaning that there are not many cases of leprosy. It is more likely for leprosy to appear in Africa with the region's median being 0.909 per 100K people.
+To find more information about this disease, click [this link](https://leprosyhistory.org/) to go to the International Leprosy Association.
