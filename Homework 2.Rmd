@@ -6,6 +6,8 @@ output:
   html_document: default
 ---
 
+#hahaha
+
 ``` {r}
 #Importing Leprosy Data:
 leprosy <- read.csv('Homework2_leprosy.csv')
